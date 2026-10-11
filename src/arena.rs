@@ -114,6 +114,11 @@ pub struct Arena {
     pub syms: Interner,
     allocs_since_gc: usize,
     live_after_gc: usize,
+    /// Allocations before the first collection, and at least this many between two. Tests lower it
+    /// so that collections happen in short runs too.
+    pub gc_min_allocs: usize,
+    /// Number of collections so far.
+    pub collections: u64,
 }
 
 impl Default for Arena {
@@ -124,7 +129,15 @@ impl Default for Arena {
 
 impl Arena {
     pub fn new() -> Arena {
-        Arena { nodes: Vec::new(), free: Vec::new(), syms: Interner::default(), allocs_since_gc: 0, live_after_gc: 0 }
+        Arena {
+            nodes: Vec::new(),
+            free: Vec::new(),
+            syms: Interner::default(),
+            allocs_since_gc: 0,
+            live_after_gc: 0,
+            gc_min_allocs: 1 << 20,
+            collections: 0,
+        }
     }
 
     #[inline]
@@ -217,7 +230,7 @@ impl Arena {
 
     /// True when enough has been allocated since the last collection to make one worthwhile.
     pub fn wants_gc(&self) -> bool {
-        self.allocs_since_gc > self.live_after_gc.max(1 << 20)
+        self.allocs_since_gc > self.live_after_gc.max(self.gc_min_allocs)
     }
 
     /// Mark & sweep from `roots`. Every `NodeId` not reachable from them becomes invalid.
@@ -246,6 +259,7 @@ impl Arena {
         self.free.reverse();
         self.allocs_since_gc = 0;
         self.live_after_gc = self.live();
+        self.collections += 1;
     }
 }
 

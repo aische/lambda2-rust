@@ -25,6 +25,8 @@ cargo run --release -- --list-examples
 - stdout gets one line per `put`/`alert` value, as it happens, and then the result as `=> <term>`.
 - stderr gets warnings, the trace and a statistics line such as `lazy · done · 11 reductions`.
 - Exit codes: 0 finished, 1 usage/parse error, 2 runtime error, 3 step limit reached.
+- If stdout is closed while `put`/`alert` write to it (e.g. `| head`), the run stops quietly with exit code 0 and
+  no statistics line.
 
 ```
 $ lambda2 --example fibonacci-1
@@ -55,6 +57,10 @@ All operators are prefix with a fixed number of arguments, so parentheses are op
 Under `lazy`, IO actions are values and only run when a top-level `bind` chain runs them, exactly as on the site.
 So `put 5` alone evaluates to `return put 5` and prints nothing. Under `cbn`/`cbv`, `put`, `get` and `random` run
 whenever they are evaluated.
+
+`cbn` and `cbv` substitute by copying the argument into every place it is used, like the site. That keeps the
+reduction counts identical, but it makes them slow on large data: a function that walks a list copies the rest of
+the list at every step, so the run time grows with the square of the list length. Use `lazy` for big inputs.
 
 ## Differences from the website
 

@@ -259,7 +259,7 @@ impl Machine {
         let who = if ix == 0 { "main".to_string() } else { format!("w{}", ev.id) };
         let name = match kind {
             Ok(k) => k.name(),
-            Err(_) => "block",
+            Err(_) => "error",
         };
         let mut path = ev.stack.clone();
         path.push(ev.term);

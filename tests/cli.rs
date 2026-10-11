@@ -131,6 +131,12 @@ fn trace_prints_every_step() {
     let kinds: Vec<&str> = trace.lines().map(|l| l.split_whitespace().nth(3).unwrap()).collect();
     assert_eq!(kinds, ["app0", "abs", "app1", "op2_0", "thunk0", "num", "thunk1", "num", "op2_0", "num", "op2", "num"]);
     assert!(trace.starts_with("#     1 main app0     ⟨@ \\x. + x 1 99⟩\n"));
+
+    // A step that fails is labelled as an error, not as one of the step kinds.
+    let out = lambda2().args(["-e", "letrec x = + x 1 in x", "--trace", "-q"]).output().unwrap();
+    let trace = String::from_utf8(out.stderr).unwrap();
+    let last = trace.lines().rev().find(|l| l.starts_with('#')).unwrap();
+    assert_eq!(last.split_whitespace().nth(3), Some("error"));
 }
 
 #[test]

@@ -37,17 +37,21 @@ fn read_golden(number: u32, strategy: Strategy) -> Golden {
     Golden { status, steps, result, output: lines.map(str::to_string).collect() }
 }
 
-fn check(number: u32, strategy: Strategy) -> Result<(), String> {
+/// Runs one example and compares it with its golden file. Returns the number of garbage collections.
+fn check(number: u32, strategy: Strategy, gc_min_allocs: Option<usize>) -> Result<u64, String> {
     let ex = &EXAMPLES[number as usize];
     let golden = read_golden(number, strategy);
     let (mut machine, _) = match load(ex.source, strategy) {
         Ok(m) => m,
         Err(e) if golden.status == "parse-error" => {
             assert!(e.message.starts_with("par is only allowed"), "{e}");
-            return Ok(());
+            return Ok(0);
         }
         Err(e) => return Err(format!("parse error: {e}")),
     };
+    if let Some(n) = gc_min_allocs {
+        machine.arena.gc_min_allocs = n;
+    }
     let mut host = TestHost::new(INPUT.to_vec(), SEED);
     let cfg = RunConfig { max_steps: MAX_STEPS, ..RunConfig::default() };
     let status = machine.run(&cfg, &mut host);
@@ -72,18 +76,34 @@ fn check(number: u32, strategy: Strategy) -> Result<(), String> {
     if result != golden.result {
         problems.push(format!("result\n    {result}\n  expected\n    {}", golden.result));
     }
-    if problems.is_empty() { Ok(()) } else { Err(problems.join("; ")) }
+    if problems.is_empty() { Ok(machine.arena.collections) } else { Err(problems.join("; ")) }
 }
 
-#[test]
-fn examples_match_the_website() {
+/// Checks every example under every strategy and returns the total number of collections.
+fn check_all(gc_min_allocs: Option<usize>) -> u64 {
     let mut failures = Vec::new();
+    let mut collections = 0;
     for ex in EXAMPLES {
         for strategy in [Strategy::Lazy, Strategy::ByName, Strategy::ByValue] {
-            if let Err(e) = check(ex.number, strategy) {
-                failures.push(format!("{:02}-{strategy} ({}): {e}", ex.number, ex.slug));
+            match check(ex.number, strategy, gc_min_allocs) {
+                Ok(n) => collections += n,
+                Err(e) => failures.push(format!("{:02}-{strategy} ({}): {e}", ex.number, ex.slug)),
             }
         }
     }
     assert!(failures.is_empty(), "{} mismatches:\n{}", failures.len(), failures.join("\n"));
+    collections
+}
+
+#[test]
+fn examples_match_the_website() {
+    check_all(None);
+}
+
+/// With the default threshold only a few of the heaviest runs above collect at all. Collecting after
+/// every few allocations, in every run, checks that the collector keeps everything the machine still
+/// uses (a freed node would crash the machine or change the result).
+#[test]
+fn examples_match_the_website_with_frequent_gc() {
+    assert!(check_all(Some(64)) > 1000);
 }
