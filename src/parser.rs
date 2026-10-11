@@ -7,6 +7,7 @@ use std::fmt;
 use crate::arena::{Arena, NodeId, Sym, Tag};
 use crate::lexer::{LexError, Token, TokenKind, tokenize};
 use crate::prim::Op;
+use crate::stack;
 use crate::strategy::Strategy;
 use crate::subst;
 
@@ -110,7 +111,12 @@ impl Parser<'_> {
         if self.lazy() { self.arena.node1(Tag::Unit, t) } else { t }
     }
 
+    /// One term. Nesting depth is only limited by memory (see [`stack::grow`]).
     fn term(&mut self) -> Result<NodeId, ParseError> {
+        stack::grow(|| self.term_unguarded())
+    }
+
+    fn term_unguarded(&mut self) -> Result<NodeId, ParseError> {
         let tok = self.next("a term")?;
         let lazy = self.lazy();
         let word = match &tok.kind {

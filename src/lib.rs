@@ -12,6 +12,7 @@ pub mod parser;
 pub mod prim;
 pub mod printer;
 pub mod rng;
+mod stack;
 pub mod strategy;
 pub mod subst;
 

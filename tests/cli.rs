@@ -134,6 +134,33 @@ fn trace_prints_every_step() {
 }
 
 #[test]
+fn deeply_nested_programs_do_not_overflow_the_stack() {
+    // Parsing, the free-variable check and substitution all recurse once per level. The deep body is
+    // copied (cbn/cbv) and substituted into (all strategies) as a whole.
+    let depth = 200_000;
+    let program = format!("@ @ \\f. f \\x. {}x 0", "+ 1 ".repeat(depth));
+    for s in ["lazy", "cbn", "cbv"] {
+        lambda2()
+            .args(["-q", "-m", "0", "-s", s, "-"])
+            .write_stdin(program.clone())
+            .assert()
+            .success()
+            .stdout("=> 200000\n");
+    }
+    let lambdas = format!("@ \\f. f {}1", "\\x. ".repeat(depth));
+    for s in ["lazy", "cbn", "cbv"] {
+        lambda2()
+            .args(["-q", "--print-limit", "2", "-s", s, "-"])
+            .write_stdin(lambdas.clone())
+            .assert()
+            .success()
+            .stdout("=> \\x. \\x. …\n");
+    }
+    let parens = format!("{}1{}", "(".repeat(depth), ")".repeat(depth));
+    lambda2().args(["-q", "-"]).write_stdin(parens).assert().success().stdout("=> 1\n");
+}
+
+#[test]
 fn list_examples() {
     lambda2()
         .arg("--list-examples")

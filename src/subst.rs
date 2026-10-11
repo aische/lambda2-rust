@@ -1,9 +1,12 @@
 //! Substitution, ported node kind by node kind from `LamTypes.js`. Which nodes are shared and
 //! which are copied matters: it decides what gets memoised, and therefore the step counts.
 //!
-//! These functions recurse over the term; the interpreter runs on a thread with a large stack.
+//! These functions recurse over the term. Every recursive call happens inside [`stack::grow`], so
+//! deep terms cannot overflow the stack; cases that return directly (variables, closed thunks) skip
+//! the check, which is measurably faster than checking on every call.
 
 use crate::arena::{Arena, NIL, Node, NodeId, Sym, Tag};
+use crate::stack;
 
 /// A fresh node like `n` (same kind and payload) with the given children, `eval_state` 0 and not
 /// opened by anyone, like the JS `new LamX(...)` calls.
@@ -34,13 +37,13 @@ pub fn substitute(a: &mut Arena, n: NodeId, name: Sym, t: NodeId) -> NodeId {
         Tag::Abs | Tag::Rec if node.name == name => n,
         Tag::Op0 => n,
         Tag::Thunk if node.closed => n,
-        _ => {
+        _ => stack::grow(|| {
             let (mut kids, arity) = kids_of(a, n);
             for k in &mut kids[..arity] {
                 *k = substitute(a, *k, name, t);
             }
             fresh_like(a, n, kids)
-        }
+        }),
     }
 }
 
@@ -54,11 +57,13 @@ pub fn clone(a: &mut Arena, n: NodeId) -> NodeId {
     if node.tag == Tag::Thunk && node.closed {
         return n;
     }
-    let (mut kids, arity) = kids_of(a, n);
-    for k in &mut kids[..arity] {
-        *k = clone(a, *k);
-    }
-    fresh_like(a, n, kids)
+    stack::grow(|| {
+        let (mut kids, arity) = kids_of(a, n);
+        for k in &mut kids[..arity] {
+            *k = clone(a, *k);
+        }
+        fresh_like(a, n, kids)
+    })
 }
 
 /// `substituteClone`: like [`substitute`], but every occurrence gets its own copy of `t`.
@@ -69,13 +74,13 @@ pub fn substitute_clone(a: &mut Arena, n: NodeId, name: Sym, t: NodeId) -> NodeI
         Tag::Var if node.name == name => clone(a, t),
         Tag::Abs | Tag::Rec if node.name == name => clone(a, n),
         Tag::Thunk if node.closed => n,
-        _ => {
+        _ => stack::grow(|| {
             let (mut kids, arity) = kids_of(a, n);
             for k in &mut kids[..arity] {
                 *k = substitute_clone(a, *k, name, t);
             }
             fresh_like(a, n, kids)
-        }
+        }),
     }
 }
 
@@ -94,26 +99,27 @@ pub fn substitute_clone_alpha(
         Tag::Var if node.name == name => clone(a, t),
         Tag::Abs | Tag::Rec if node.name == name => clone(a, n),
         Tag::Abs | Tag::Rec if free.contains(&node.name) => {
-            let old = node.name;
-            let body = node.kids[0];
-            let new_name = format!("{}_{}", a.syms.name(old), *next_id);
-            *next_id += 1;
-            let new_sym = a.syms.intern(&new_name);
-            let new_var = a.var(new_sym);
-            let renamed = substitute_clone(a, body, old, new_var);
-            let body = substitute_clone_alpha(a, renamed, name, t, free, next_id);
-            let r = fresh_like(a, n, [body, NIL, NIL]);
-            a.get_mut(r).name = new_sym;
-            r
+            let (old, body) = (node.name, node.kids[0]);
+            stack::grow(|| {
+                let new_name = format!("{}_{}", a.syms.name(old), *next_id);
+                *next_id += 1;
+                let new_sym = a.syms.intern(&new_name);
+                let new_var = a.var(new_sym);
+                let renamed = substitute_clone(a, body, old, new_var);
+                let body = substitute_clone_alpha(a, renamed, name, t, free, next_id);
+                let r = fresh_like(a, n, [body, NIL, NIL]);
+                a.get_mut(r).name = new_sym;
+                r
+            })
         }
         Tag::Thunk if node.closed => n,
-        _ => {
+        _ => stack::grow(|| {
             let (mut kids, arity) = kids_of(a, n);
             for k in &mut kids[..arity] {
                 *k = substitute_clone_alpha(a, *k, name, t, free, next_id);
             }
             fresh_like(a, n, kids)
-        }
+        }),
     }
 }
 
@@ -131,17 +137,17 @@ pub fn free_vars(a: &Arena, n: NodeId) -> Vec<Sym> {
                     free.push(node.name);
                 }
             }
-            Tag::Abs | Tag::Rec => {
+            Tag::Abs | Tag::Rec => stack::grow(|| {
                 bound.push(node.name);
                 go(a, node.kids[0], bound, free);
                 bound.pop();
-            }
+            }),
             Tag::Thunk if node.closed => {}
-            tag => {
+            tag => stack::grow(|| {
                 for &k in &node.kids[..tag.arity()] {
                     go(a, k, bound, free);
                 }
-            }
+            }),
         }
     }
     let mut free = Vec::new();

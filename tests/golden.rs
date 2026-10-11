@@ -77,22 +77,13 @@ fn check(number: u32, strategy: Strategy) -> Result<(), String> {
 
 #[test]
 fn examples_match_the_website() {
-    // Under cbn many examples copy huge terms; run on a big stack like the CLI does.
-    let failures = std::thread::Builder::new()
-        .stack_size(256 * 1024 * 1024)
-        .spawn(|| {
-            let mut failures = Vec::new();
-            for ex in EXAMPLES {
-                for strategy in [Strategy::Lazy, Strategy::ByName, Strategy::ByValue] {
-                    if let Err(e) = check(ex.number, strategy) {
-                        failures.push(format!("{:02}-{strategy} ({}): {e}", ex.number, ex.slug));
-                    }
-                }
+    let mut failures = Vec::new();
+    for ex in EXAMPLES {
+        for strategy in [Strategy::Lazy, Strategy::ByName, Strategy::ByValue] {
+            if let Err(e) = check(ex.number, strategy) {
+                failures.push(format!("{:02}-{strategy} ({}): {e}", ex.number, ex.slug));
             }
-            failures
-        })
-        .unwrap()
-        .join()
-        .unwrap();
+        }
+    }
     assert!(failures.is_empty(), "{} mismatches:\n{}", failures.len(), failures.join("\n"));
 }

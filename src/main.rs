@@ -58,19 +58,8 @@ const EXIT_USAGE: u8 = 1;
 const EXIT_RUNTIME: u8 = 2;
 const EXIT_LIMIT: u8 = 3;
 
-/// The machine's substitution functions recurse over terms that can get deep (especially under
-/// call-by-name), so the interpreter runs on a thread with a big stack.
-const STACK_SIZE: usize = 256 * 1024 * 1024;
-
 fn main() -> ExitCode {
-    let cli = Cli::parse();
-    std::thread::Builder::new()
-        .name("lambda2".to_string())
-        .stack_size(STACK_SIZE)
-        .spawn(move || run(cli))
-        .expect("failed to spawn the interpreter thread")
-        .join()
-        .unwrap_or(ExitCode::from(EXIT_RUNTIME))
+    run(Cli::parse())
 }
 
 /// Prints the result line; a closed stdout (e.g. `| head`) is not an error.
