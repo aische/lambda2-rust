@@ -1,0 +1,37 @@
+# asks for a number N, creates a list
+# of N random numbers between 0 and 100, 
+# then sorts the list and prints it 
+letrec append = \x.\y. 
+  if iscons x 
+    then : car x @@append cdr x y 
+    else y 
+in 
+letrec split = \x.\yss. 
+  if iscons yss 
+    then let lr = @@ split x cdr yss in 
+         if < car yss x 
+           then : (: car yss car lr) cdr lr 
+           else : car lr (: car yss cdr lr) 
+    else : 0 0
+in 
+letrec qsort = \xss. 
+  if iscons xss 
+    then let lr = @@ split car xss cdr xss in 
+         @@ append @ qsort car lr (: car xss @ qsort cdr lr) 
+    else 0 
+in 
+letrec printlist = \xs.  if iscons xs 
+    then bind put car xs \x. 
+              @printlist cdr xs 
+    else return 0 
+in 
+letrec randlist = \n. 
+  if < n 1 
+    then return 0 
+    else bind random \x. 
+         bind @randlist - n 1 \r. 
+         return : round * x 100 r 
+in 
+bind get \n.
+bind @randlist n \list. 
+@printlist @ qsort list 

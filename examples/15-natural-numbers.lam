@@ -1,0 +1,9 @@
+letrec printlist = \xs.  if iscons xs 
+    then bind put car xs \x. 
+              @printlist cdr xs 
+    else return 0 
+in 
+letrec inflist = \i. : i @inflist + i 1
+in
+letrec foldr = \f.\x.\l. if iscons l then @ @ f car l @@@foldr f x cdr l else x
+in @printlist @@@foldr \x.\y. : x y 0 @ inflist 33

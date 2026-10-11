@@ -1,0 +1,172 @@
+# qsort and isort
+let id = \x.x 
+in 
+let const = \x.\y.x 
+in 
+let succ = \x. + x 1 
+in 
+let compose = \f.\g.\x. @f@g x 
+in 
+let flip = \f.\x.\y.@@f y x 
+in 
+# list functions 
+let map = \f.\x. 
+  letrec aux = \x. 
+    if iscons x 
+        then : @f car x @aux cdr x 
+    else 0 
+  in @ aux x 
+in 
+let zipwith = \f.\x.\y. 
+  letrec aux = \x.\y. 
+    if iscons x 
+      then if iscons y 
+        then : @@f car x car y @@aux cdr x cdr y 
+      else 0 
+    else 0 
+  in @@ aux x y 
+in 
+let foldr = \f.\x.\a. 
+  letrec aux = \a. 
+    if iscons a 
+      then @@f car a @aux cdr a 
+      else x 
+  in @aux a 
+in 
+let foldl = \f.\x.\a. 
+  letrec aux = \x.\a. 
+    if iscons a 
+      then @@aux @@f x car a cdr a 
+      else x 
+  in @@aux x a 
+in 
+letrec filter = \p.\list. 
+  if iscons list 
+  then 
+    let x = car list in 
+    let r = @@filter p cdr list in 
+    if @p x 
+    then : x r 
+    else r 
+  else 
+    list 
+in 
+letrec take = \n.\x. 
+  if < n 1 
+    then 0 
+    else : car x @ @ take - n 1 cdr x 
+in 
+letrec drop = \n.\x. 
+  if < n 1 
+    then x 
+    else @ @ drop - n 1 cdr x 
+in 
+letrec repeat = \x. : x @repeat x 
+in 
+let replicate = \n.\x. 
+  letrec aux = \n. 
+    if < n 1 
+      then 0 
+      else : x @ aux - n 1 
+  in @aux n 
+in 
+let reverse = \x. 
+  letrec aux = \r.\x. 
+    if iscons x 
+      then @@aux : car x r cdr x 
+      else r 
+  in @@aux 0 x 
+in 
+letrec append = \x.\y. 
+  if iscons x 
+    then : car x @@append cdr x y 
+    else y 
+in 
+let iter = \f.\x. 
+  letrec aux = \x. : x @aux @f x 
+  in @aux x 
+in 
+let sum = @@foldr \x.\y.+ x y 0 
+in 
+let product = @@foldr \x.\y.* x y 0 
+in 
+let length = @@foldr \x.\y.+ 1 y 0 
+in 
+# IO functions 
+let mapm = \f.\x. 
+  letrec aux = \x. 
+    if iscons x 
+      then bind @f car x \a. 
+           bind @aux cdr x \r. 
+           return : a r 
+      else return 0 
+  in @aux x 
+in 
+let sequence = @mapm id 
+in 
+let mapmu = \f.\x. 
+  letrec aux = \x. 
+    if iscons x 
+      then bind @f car x \a. 
+           @aux cdr x 
+      else return 0 
+  in @aux x 
+in 
+let randlist = \n. @sequence @@replicate n random 
+in 
+let printlist = @ mapmu \x.put x 
+in 
+#---------------------------------------------------- 
+let prims = 
+  letrec sieve = \list. 
+    let p = car list in 
+    let xs = cdr list in 
+    : p @ sieve @@ filter \x. > % x p 0 list 
+  in 
+  let nums = @@ iter succ 2 
+  in @sieve nums 
+in 
+#---------------------------------------------------- 
+letrec fibs = : 0 : 1 @ @ @ zipwith \x.\y. + x y fibs cdr fibs 
+in 
+let fib = \n. car @ @ drop n fibs 
+in 
+#---------------------------------------------------- 
+letrec qsplit = \x.\yss. 
+  if iscons yss 
+    then let lr = @@ qsplit x cdr yss in 
+         if < car yss x 
+           then : (: car yss car lr) cdr lr 
+           else : car lr (: car yss cdr lr) 
+    else : 0 0 
+in 
+letrec qsort = \xss. 
+  if iscons xss 
+    then let lr = @@ qsplit car xss cdr xss in 
+         @@ append @ qsort car lr (: car xss @ qsort cdr lr) 
+    else 0 
+in 
+#---------------------------------------------------- 
+letrec insert = \x.\xs. 
+  if iscons xs 
+    then if > car xs x 
+      then : x xs 
+      else : car xs @@insert x cdr xs 
+    else : x 0 
+in 
+let isort = \xss. 
+  letrec aux = \r.\i. 
+    if iscons i 
+      then @@aux @@insert car i r cdr i 
+      else r 
+  in @@aux 0 xss 
+in 
+#---------------------------------------------------- 
+bind @randlist 5 \list.
+let a = @qsort list in
+let b = @isort list in
+par a
+par b
+bind @printlist a \d.
+bind @printlist b \d.
+return 0

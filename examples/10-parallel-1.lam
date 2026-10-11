@@ -1,0 +1,17 @@
+# parallel evaluation 
+letrec drop = \n.\x. 
+  if < n 1 
+    then x 
+    else @ @ drop - n 1 cdr x 
+in 
+letrec add = \x. \y.  
+  : + car x car y @ @ add cdr x cdr y 
+in 
+letrec fibs = : 0 : 1 @ @ add fibs cdr fibs 
+in  
+let fib = \n. car @ @ drop n fibs 
+in 
+letrec a = \x. @a x in 
+par @ a 1 
+par @fib 10  
++ @fib 20 @fib 40 

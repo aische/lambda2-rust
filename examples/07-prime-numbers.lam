@@ -1,0 +1,20 @@
+# computes the prime numbers and prints them to the console 
+letrec printlist = \xs.if iscons xs then bind put car xs \x. @printlist cdr xs else return 0 in 
+letrec iter = \n. : n @iter + n 1 in 
+let nums = @ iter 2 in  
+letrec filter = \p.\list. 
+  if iscons list 
+  then 
+    let x = car list in 
+    let r = @@filter p cdr list in 
+    if @p x 
+    then : x r 
+    else r 
+  else  
+    list 
+in 
+letrec sieve = \list. 
+  let p = car list in 
+  let xs = cdr list in 
+  : p @ sieve @@ filter \x. > % x p 0 list 
+in @printlist @ sieve nums 

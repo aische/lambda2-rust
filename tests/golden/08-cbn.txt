@@ -1,0 +1,8 @@
+status limit
+steps 100000
+result bind put car cdr cdr cdr if iscons cdr if iscons if iscons car if < car car if iscons cdr cdr cdr cdr : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 then @ \lr. if < car cdr cdr cdr cdr : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 car : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 then : : car cdr cdr cdr cdr : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 car lr cdr lr else : car lr : car cdr cdr cdr cdr : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 cdr lr @ @ @ \split. \x. \yss. if iscons yss then @ \lr. if < car yss x then : : car yss car lr cdr lr else : car lr : car yss cdr lr @ @ @ split split x cdr yss else : 0 0 \split. \x. \yss. if iscons yss then @ \lr. if < car yss x then : : car yss car lr cdr lr else : car lr : car yss cdr lr @ @ @ split split x cdr yss else : 0 0 car : round * 0.6011037519201636 100 : round * 0.44829055899754167 100 : round * 0.8524657934904099 100 : round * 0.6697340414393693 100 : round * 0.17481389874592423 100 0 cdr cdr cdr cdr …
+output
+17
+45
+60
+67

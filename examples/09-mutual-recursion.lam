@@ -1,0 +1,8 @@
+# mutual recursive functions 
+letrec flipflop = : : 0 cdr flipflop : 1 car flipflop in 
+letrec printlist = \xs.  if iscons xs  
+    then bind put car xs \x.  
+              @printlist cdr xs  
+    else return 0  
+in  
+@printlist car flipflop 

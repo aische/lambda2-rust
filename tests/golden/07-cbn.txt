@@ -1,0 +1,8 @@
+status limit
+steps 100000
+result bind put car if iscons if iscons cdr cdr if iscons if iscons cdr cdr cdr @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 then @ \x. @ \r. if @ \x. > % x car @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 0 x then : x r else r @ @ @ \filter. \p. \list. if iscons list then @ \x. @ \r. if @ p x then : x r else r @ @ @ filter filter p cdr list car list else list \filter. \p. \list. if iscons list then @ \x. @ \r. if @ p x then : x r else r @ @ @ filter filter p cdr list car list else list \x. > % x car @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 0 cdr cdr cdr cdr @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 car cdr cdr cdr @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 else cdr cdr cdr @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 then @ \x. @ \r. if @ \x. > % x car @ @ @ \x. @ x x \filter. \p. \list. if iscons list then @ \x. @ \r. if @ p x then : x r else r @ @ @ filter filter p cdr list car list else list \x. > % x car @ @ \x. @ x x \iter. \n. : n @ @ iter iter + n 1 2 0 @ @ \x. @ x x \iter. \n. : n …
+output
+2
+3
+5
+7

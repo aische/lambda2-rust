@@ -1,0 +1,8 @@
+letrec f = \x.@f x in 
+letrec g = \x.\y.if == x 1 then @@g x y else @@g x y in 
+letrec h = \x.\y.\z.if == x + 1 1 then @@@h x y z else @@@h x y z in 
+letrec i = \x.\y.\z.\zz.@@@@i x y z zz in 
+par @f 1
+par @@g 1 1
+par @@@h 1 1 1
+@@@@i 1 1 1 1

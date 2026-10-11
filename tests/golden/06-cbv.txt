@@ -1,0 +1,4 @@
+status limit
+steps 100000
+result @ \fibs. @ \fib. + + + + @ fib 10 @ fib 20 + @ fib 30 @ fib 40 + + @ fib 50 @ fib 60 + @ fib 70 @ fib 80 + + + @ fib 80 @ fib 70 + @ fib 60 @ fib 50 + + @ fib 40 @ fib 30 + @ fib 20 @ fib 10 \n. car @ @ \n. \x. if < n 1 then x else @ @ @ \drop. \n. \x. if < n 1 then x else @ @ @ drop drop - n 1 cdr x \drop. \n. \x. if < n 1 then x else @ @ @ drop drop - n 1 cdr x - n 1 cdr x n fibs @ \y. : 0 y @ \y. : 1 y @ @ \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ \add. \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ add add cdr x cdr y \add. \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ add add cdr x cdr y cdr x cdr y @ \y. : 0 y @ \y. : 1 y @ @ \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ \add. \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ add add cdr x cdr y \add. \x. \y. @ @ \x. \y. : x y + car x car y @ @ @ add add cdr x cdr y cdr x cdr y @ \y. : 0 y @ \y. : 1 y @ @ \x. \y. …
+output

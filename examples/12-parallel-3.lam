@@ -1,0 +1,73 @@
+# asks for a number N, creates a 3 lists
+# of N random numbers between 0 and 100, 
+# then sorts the list and prints them
+# in parallel.
+# then computes some fibonacci numbers
+# in parallel and prints them
+letrec append = \x.\y. 
+  if iscons x 
+    then : car x @@append cdr x y 
+    else y 
+in 
+letrec split = \x.\yss. 
+  if iscons yss 
+    then let lr = @@ split x cdr yss in 
+         if < car yss x 
+           then : (: car yss car lr) cdr lr 
+           else : car lr (: car yss cdr lr) 
+    else : 0 0
+in 
+letrec qsort = \xss. 
+  if iscons xss 
+    then let lr = @@ split car xss cdr xss in 
+         @@ append @ qsort car lr (: car xss @ qsort cdr lr) 
+    else 0 
+in 
+letrec printlist = \xs.  if iscons xs 
+    then bind put car xs \x. 
+              @printlist cdr xs 
+    else return 0 
+in 
+letrec randlist = \n. 
+  if < n 1 
+    then return 0 
+    else bind random \x. 
+         bind @randlist - n 1 \r. 
+         return : round * x 100 r 
+in
+# computes the 11th fibonacci number 
+letrec drop = \n.\x. 
+  if < n 1 
+    then x 
+    else @ @ drop - n 1 cdr x 
+in 
+letrec add = \x. \y.  
+  : + car x car y @ @ add cdr x cdr y 
+in 
+letrec fibs = : 0 : 1 @ @ add fibs cdr fibs 
+in  
+let fib = \n. car @ @ drop n fibs 
+in 
+let ff = \n.
+  bind @randlist n \list.
+  bind @printlist list \d.
+  @printlist @ qsort list 
+in
+bind get \n.
+let a = @ff n in
+let b = @ff n in
+let c = @ff n in
+par a
+par b 
+bind c \d.
+bind put d \d. 
+letrec rr = \x. @rr x in 
+let a = @fib 10 in
+let b = @fib 14 in
+let c = @fib 18 in
+par a
+par b
+par @ rr 1 
+let r = + c + a b in
+bind put r \d.
+return + 1 2

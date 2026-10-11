@@ -1,0 +1,31 @@
+status limit
+steps 100000
+result bind put car cdr cdr cdr if iscons cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr @ @ \inflist. \i. : i @ @ inflist inflist + i 1 \inflist. \i. : i @ @ inflist inflist + i 1 + + + + + + + + + + + + 33 1 1 1 1 1 1 1 1 1 1 1 1 then @ @ \x. \y. : x y car cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr @ @ \x. @ x x \inflist. \i. : i @ @ inflist inflist + i 1 33 @ @ @ @ \foldr. \f. \x. \l. if iscons l then @ @ f car l @ @ @ @ foldr foldr f x cdr l else x \foldr. \f. \x. \l. if iscons l then @ @ f car l @ @ @ @ foldr foldr f x cdr l else x \x. \y. : x y 0 cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr @ @ \x. @ x x \inflist. \i. : i @ @ inflist inflist + i 1 33 else 0 \x. @ @ \printlist. \xs. if iscons xs then bind put car xs \x. @ @ printlist printlist cdr xs else 0 \printlist. \xs. if iscons xs then bind put car xs \x. @ @ printlist printlist cdr xs else 0 cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr cdr @ @ @ @ \x. @ x x \foldr. \f. \x. \l. if iscons l then @ …
+output
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59

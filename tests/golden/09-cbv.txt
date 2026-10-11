@@ -1,0 +1,4 @@
+status limit
+steps 100000
+result @ \flipflop. @ \printlist. @ printlist car flipflop @ \x. @ x x \printlist. \xs. if iscons xs then bind put car xs \x. @ @ printlist printlist cdr xs else 0 @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : 0 y cdr @ @ \x. \y. : x y @ \y. : …
+output

@@ -1,0 +1,46 @@
+# merge sort
+letrec printlist = \xs.  if iscons xs 
+    then bind put car xs \x. 
+              @printlist cdr xs 
+    else return 0 
+in 
+letrec randlist = \n. 
+  if < n 1 
+    then return 0 
+    else bind random \x. 
+         bind @randlist - n 1 \r. 
+         return : round * x 100 r 
+in 
+letrec append = \x.\y. 
+  if iscons x 
+    then : car x @@append cdr x y 
+    else y 
+in 
+letrec halve = \xs.
+  if iscons xs
+    then if iscons cdr xs
+           then let lr = @halve cdr cdr xs in
+                : (: car xs car lr) (: car cdr xs cdr lr)
+           else : (: car xs 0) 0
+    else : 0 0
+in
+letrec merge = \xs.\ys.
+  if iscons xs
+    then if iscons ys
+           then if < car xs car ys
+                  then : car xs @@merge cdr xs ys
+                  else : car ys @@merge xs cdr ys
+           else xs
+    else ys
+in
+letrec msort = \xs.
+  if iscons xs
+    then if iscons cdr xs
+           then let lr = @halve xs in
+                @@merge (@msort car lr) (@msort cdr lr)
+           else xs
+    else xs
+in
+bind get \n.
+bind @randlist n \list. 
+@printlist @ msort list

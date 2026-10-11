@@ -1,0 +1,4 @@
+status limit
+steps 100000
+result @ @ \z. \zz. @ @ @ @ \x. \y. \z. \zz. @ @ @ @ … x y z zz 1 1 z zz 1 1
+output
